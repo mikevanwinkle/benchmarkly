@@ -3,6 +3,8 @@ namespace Benchmarkly;
 
 use Benchmarkly\Options;
 use Benchmarkly\Ajax;
+use Benchmarkly\Cron;
+use Benchmarkly\Data;
 
 class Benchmarkly {
 	public $default = array();
@@ -39,13 +41,13 @@ class Benchmarkly {
 			add_action( "init", array( $this, "init" ) );
 			add_action( "admin_menu", array( $this, "admin_menu" ) );
 			add_action( "admin_enqueue_scripts", array( $this, "admin_enqueue_scripts" ) );
-			
 			// load admin ajax handlers
 			Ajax::privateHandlers();
 			
 		}
 		
 		// load all others here
+		add_action('bm_do_regular_cron',array($this, 'doCheck'));
 	}
 
 	public function init() 
@@ -64,7 +66,6 @@ class Benchmarkly {
 
 	public function admin_enqueue_scripts()
 	{
-		wp_enqueue_script( "benchmarkly-js", plugins_url("assets/benchmarkly.js",__FILE__) , array('jquery'));
 	}
 
 	public function settingsPage()
@@ -72,7 +73,15 @@ class Benchmarkly {
 		if ( isset($_REQUEST['check_benchmarks']) ) { 
 			$this->doCheck();
 		}
+		wp_enqueue_script( 'jquery-ui-core' );
+		wp_enqueue_script( 'jquery-ui-accordion' );
+		wp_enqueue_script( 'flot-js', plugins_url("assets/flot.js",__FILE__) , array('jquery'));
+		wp_enqueue_script( "flot-js-time", plugins_url("assets/flot-time.js",__FILE__) , array('jquery','flot-js'));
+		wp_enqueue_script( "benchmarkly-js", plugins_url("assets/benchmarkly.js",__FILE__) , array('jquery','flot-js'));
+		wp_enqueue_style ( 'benchmarkly-css', plugins_url("assets/benchmarkly.css",__FILE__) );
 		$load = Loader::instance();
+		$data = Data::instance();
+		wp_localize_script( "benchmarkly-js", 'bmkly', array( "benchmarks" => json_encode( Benchmarks::buildChartJSON() ) , 'chart_data' => 1 ) );
 		$load->loadView( "settings-main", $this->options );
 	}
 
@@ -88,6 +97,11 @@ class Benchmarkly {
 		$benchmarks->testAll();
 	}
 
+	public function doCron() 
+	{
+		$this->loadBenchmarks();
+	}
+
 	public function checkActive()
 	{
 		global $wpdb;
@@ -96,7 +110,7 @@ class Benchmarkly {
 			  `type` varchar(10) DEFAULT 'NOT NULL',
 			  `name` varchar(10) DEFAULT 'NOT NULL',
 			  `source` varchar(10) DEFAULT 'NOT NULL',
-			  `dataint` int(11) DEFAULT NULL,
+			  `datanum` DECIMAL(10,2) NULL,
 			  `datachar` varchar(10) DEFAULT NULL,
 			  `datalong` longtext,
 			  `date` int(11) DEFAULT NULL,
@@ -105,6 +119,7 @@ class Benchmarkly {
 		$tbl = sprintf( "$tbl", $wpdb->prefix );
 		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
 		dbDelta( $tbl );
+		Cron::setup( $this );
 	}
 
 	public function checkInactive()
@@ -113,4 +128,11 @@ class Benchmarkly {
 		$sql = sprintf( "DROP TABLE %sbenchmarks" , $wpdb->prefix );
 		$wpdb->query( $sql );
 	}
-} 
+
+	public function shutdown() 
+	{
+		if ( isset($_REQUEST['doing_benchmarks']) ) {	
+			add_action("shutdown",function() { echo "<!--BMKLY[[apachemememory:".memory_get_usage(TRUE)."]]-->"; });
+		}
+	}
+}

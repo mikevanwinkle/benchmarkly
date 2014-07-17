@@ -5,12 +5,12 @@ use PDO;
 use Benchmarkly\BenchmarkImplementation;
 use Benchmarkly\Data;
 
-class MysqlBenchmark extends BenchmarkImplementation {
+class Apachememory extends BenchmarkImplementation {
 	public $db;
 	public $source;
-	public $key 		= "queries_per_sec";
-	public $type 		= "server";
-	public $label 		= "Queries per sec";
+	public $key 		= "apache_memory";
+	public $type 		= "site";
+	public $label 		= "Apache Memory";
 	public $report 		= "db";
 	public $datatype 	= "datanum";
 	public $fillcolor 	= "rgba(220,220,220,0.5)";
@@ -26,7 +26,6 @@ class MysqlBenchmark extends BenchmarkImplementation {
 
 	public function test()
 	{
-		$this->connect();
 		$this->run()->report();
 		return $this;
 	}
@@ -41,21 +40,11 @@ class MysqlBenchmark extends BenchmarkImplementation {
 		return $this;
 	}
 
-	public function connect() 
-	{
-		$pdo = new PDO("mysql:dbname=".DB_NAME.";host=".DB_HOST, DB_USER, DB_PASSWORD);
-		if( !$pdo ) {
-			throw new Exception("Cannot connect to db");
-		}
-		$this->db = $pdo;
-	}
-
 	public function run() 
 	{
-		$stats = $this->db->getAttribute(PDO::ATTR_SERVER_INFO);
-		if ( preg_match( "#Queries per second avg:\s?(\d+\.\d+)#", $stats, $matches ) ) {
-			$this->value = $matches[1];
-		}
+		$resp = wp_remote_get( get_option('siteurl') );
+		preg_match( Pattern::pattern("apachemem"), $resp->body, $matches);
+		print_r($matches);
 		return $this;
 	}
 	

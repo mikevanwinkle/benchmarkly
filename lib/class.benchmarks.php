@@ -57,5 +57,16 @@ class Benchmarks {
 		}
 		return $this->results;
 	}
+	
+	public static function buildChartJSON() 
+	{
+		$bm = self::instance();
+		$bm->loadAll();
+		$json = array();
+		foreach( $bm->benchmarks as $chart ) {
+			$json[] = $chart->getChartData();
+		}
+		return $json;
+	}
 
 }

@@ -69,7 +69,10 @@ class Loader {
 	private function __autoload( $class ) {
 		if( strstr( $class, "Benchmarkly" ) ) {
 			$class = ltrim( str_replace('benchmarkly','', strtolower($class) ), "\\");
-			include_once __DIR__.$this->libdir."/class.".$class.".php";
+			$path = __DIR__.$this->libdir."/class.".$class.".php";
+			if ( file_exists( $path ) ) {
+				include_once $path;
+			}
 		}
 	}
 }
