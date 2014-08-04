@@ -9,6 +9,7 @@ class Patterns {
 
 	public function __construct() 
 	{
+		$this->loadPatterns();
 	}
 
 	public static function instance()
@@ -29,7 +30,7 @@ class Patterns {
 	{
 		if( !file_exists(__DIR__.'/patterns.ini') ) return false;
 		$this->patterns = parse_ini_file(__DIR__.'/patterns.ini');
-		if ( is_array( $this->patterns ) ) {
+		if ( !is_array( $this->patterns ) ) {
 			$this->patterns = array();
 		}
 		return $this;

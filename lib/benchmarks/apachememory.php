@@ -4,6 +4,7 @@ namespace Benchmarkly;
 use PDO;
 use Benchmarkly\BenchmarkImplementation;
 use Benchmarkly\Data;
+use Benchmarkly\Patterns;
 
 class Apachememory extends BenchmarkImplementation {
 	public $db;
@@ -42,16 +43,17 @@ class Apachememory extends BenchmarkImplementation {
 
 	public function run() 
 	{
-		$resp = wp_remote_get( get_option('siteurl') );
-		preg_match( Pattern::pattern("apachemem"), $resp->body, $matches);
-		print_r($matches);
+		$resp = wp_remote_get( rtrim( get_option('siteurl'), "/" )."?doing_benchmarks=1" );
+		if ( preg_match( Patterns::pattern("apachemem"), $resp['body'], $matches) ) {
+			$this->value = $matches[1];
+		}
 		return $this;
 	}
 	
 	public function getChartData()
 	{
 		$db = new Data();
-		$results = $db->get("queries_per_sec");
+		$results = $db->get($this->key);
 		$labels = array();
 		$vals = array();
 		foreach( $results as $result ) {
@@ -60,6 +62,11 @@ class Apachememory extends BenchmarkImplementation {
 		}
 		$data = array("data"=>$vals);
 		return $data;
+	}
+	
+	public function shutdown()
+	{
+		echo "<!--BMKLY[[apachememory:".memory_get_usage(TRUE)."]]-->";
 	}
 	
 }

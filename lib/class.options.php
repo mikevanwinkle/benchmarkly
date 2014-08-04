@@ -5,6 +5,7 @@ class Options {
 	private $default = array(
 		'installed'	=> 1,
 		'do_cron'	=> 1,
+		'default_benchmark' => 'apache_memory',
 	);	
 	private $key = "benchmarkly_options";
 	private $options = false; // loaded options

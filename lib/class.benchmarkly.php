@@ -48,6 +48,7 @@ class Benchmarkly {
 		
 		// load all others here
 		add_action('bm_do_regular_cron',array($this, 'doCheck'));
+		$this->shutdown();
 	}
 
 	public function init() 
@@ -81,8 +82,8 @@ class Benchmarkly {
 		wp_enqueue_style ( 'benchmarkly-css', plugins_url("assets/benchmarkly.css",__FILE__) );
 		$load = Loader::instance();
 		$data = Data::instance();
-		wp_localize_script( "benchmarkly-js", 'bmkly', array( "benchmarks" => json_encode( Benchmarks::buildChartJSON() ) , 'chart_data' => 1 ) );
-		$load->loadView( "settings-main", $this->options );
+		wp_localize_script( "benchmarkly-js", 'bmkly', array( "benchmarks" => json_encode( Benchmarks::buildChartJSON("queries_per_sec") ) , 'chart_data' => 1 ) );
+		$load->loadView( "settings-main", array_merge( $this->options, array( 'benchmarks'=>Benchmarks::instance() ) ) );
 	}
 
 	public function doCheck() 
@@ -132,7 +133,13 @@ class Benchmarkly {
 	public function shutdown() 
 	{
 		if ( isset($_REQUEST['doing_benchmarks']) ) {	
-			add_action("shutdown",function() { echo "<!--BMKLY[[apachemememory:".memory_get_usage(TRUE)."]]-->"; });
+			$benchmarks = Benchmarks::instance();
+			$benchmarks->loadAll();
+			foreach( $benchmarks->benchmarks as $name => $obj ) {
+				if( method_exists($obj,"shutdown")) {
+					add_action("shutdown", array( $obj, "shutdown" ) );
+				}
+			}
 		}
 	}
 }

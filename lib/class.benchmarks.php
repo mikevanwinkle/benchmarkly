@@ -29,7 +29,11 @@ class Benchmarks {
 			$this->addBenchmark( new $benchmark, $name );
 		}
 	}
-
+	
+	/**
+	 * Singleton function to return instance
+	 * @requires php 5.2.0
+	**/
 	static function instance() 
 	{
 		if ( !self::$instance ) {
@@ -37,19 +41,31 @@ class Benchmarks {
 		}
 		return self::$instance;
 	}
-
+	
+	/**
+	 * Convert file neam to class name
+	 * @requires php 5.2.0
+	**/
 	private function normalizeName( $name ) 
 	{
 		$name = ucfirst( str_replace("benchmark","Benchmark", $name) );
 		return $name;
 	}
 
+	/**
+	 * Add benchmark to benchmarks object
+	 * @requires php 5.2.0
+	**/
 	public function addBenchmark( Benchmark $benchmark, $name = 'default' ) 
 	{
 		$class=get_class($benchmark);
 		$this->benchmarks[$name] = $benchmark;
 	}
-
+	
+	/**
+	 * Run all benchmarks
+	 * @requires php 5.2.0
+	**/
 	public function testAll() 
 	{	
 		foreach( $this->benchmarks as $name => $obj ) {
@@ -58,13 +74,18 @@ class Benchmarks {
 		return $this->results;
 	}
 	
-	public static function buildChartJSON() 
+	/**
+	 * Return json data for all benchmarks
+	 * @requires php 5.2.0
+	 * @params $benchmark required string 
+	**/
+	public static function buildChartJSON( $benchmark ) 
 	{
 		$bm = self::instance();
 		$bm->loadAll();
 		$json = array();
 		foreach( $bm->benchmarks as $chart ) {
-			$json[] = $chart->getChartData();
+			$json[$chart->key] = $chart->getChartData();
 		}
 		return $json;
 	}

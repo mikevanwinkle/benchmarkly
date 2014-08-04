@@ -11,6 +11,15 @@
 				<h3 class="accordion-section-title hndle"><?php _e("Benchmarks","benchmarkly"); ?></h3>
 				<div class="accordion-section-content">
 					<div class="inside">
+						<div class="form-control clear clearfix"><div style="text-align:right;">Toggle Benchmark: 
+							<select class="select" name="benchmark" >
+								<?php foreach( $benchmarks->benchmarks as $benchmark ) : ?>
+									<option value="<?php echo $benchmark->key; ?>"><?php echo $benchmark->label; ?></option>
+								<?php endforeach; ?>
+							</select>
+							</div>
+						</div>
+						<input type="hidden" name="current-benchmark" id="current-benchmark" value="<?php echo $default_benchmark; ?>" />
 						<p class=""><div id="mainChart" class="demo-container demo-placeholder"></div></p>
 					</div>
 				</div>
