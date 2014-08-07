@@ -2,10 +2,11 @@
 namespace Benchmarkly;
 
 use Benchmarkly\Benchmarks;
-
+use Benchmarkly\Loader;
 class Data {
 	private $wpdb;
 	static $instance = false;
+	private $schemadir = "/sql";
 	
 	public function __construct()
 	{
@@ -23,7 +24,7 @@ class Data {
 	{
 		$benchmarks = Benchmarks::instance();
 		$benchmarks->loadAll();
-		return $benchmarks->testAll();
+		return $benchmarks->runAll();
 	}
 	
 	public function saveBenchmark( BenchmarkImplementation $benchmark )
@@ -88,4 +89,19 @@ class Data {
 		}
 		return $out;
 	}	
+	
+	/** 
+	 * Returns the MySQL schema for requested table 
+	 *
+	 * @params $table string (required) - name of the table to retrieve 
+	 * @returns string | false
+	 * @requires 5.2.0 
+	 */
+	static public function getSchema( $table )
+	{
+		$schemas = Loader::loadSchemas();
+		print_r($schemas);
+	}
+	
+
 }

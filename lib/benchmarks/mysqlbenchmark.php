@@ -26,7 +26,7 @@ class MysqlBenchmark extends BenchmarkImplementation {
 		$this->source = basename( __FILE__ );
 	}
 
-	public function test()
+	public function runandreport()
 	{
 		$this->connect();
 		$this->run()->report();
@@ -59,26 +59,6 @@ class MysqlBenchmark extends BenchmarkImplementation {
 			$this->value = $matches[1];
 		}
 		return $this;
-	}
-	
-	public function getChartData()
-	{
-		$db = new Data();
-		$params = array();
-		if ( !isset($_GET['bmkly']['after']) ) {
-			$today = new DateTime();
-			$after = $today->add( DateInterval::createFromDateString( "-30 days"  ) );
-			$params['after'] = $after->format("Y-m-d 00:00:00");
-		} 
-		$results = $db->get( "queries_per_sec", $params);
-		$labels = array();
-		$vals = array();
-		foreach( $results as $result ) {
-			$time = $result->date;
-			$vals[$time] = $result->{$this->datatype};
-		}
-		$data = array("data"=>$vals);
-		return $data;
 	}
 	
 }

@@ -47,6 +47,39 @@ class Loader {
 		}
 	}
 
+	/** 
+	 * List available table schemas
+	 * 
+	 *
+	 **/
+	 static public function loadSchemas()
+	 {
+
+		$dir_to_read = apply_filters("bmkly_schema_dirs", Loader::getLibDir()."/sql");
+		$schemas = self::searchDir( $dir_to_read, "sql" );
+		return $schemas;
+	 }
+
+	/** 
+	 * Search a directory files, maybe matching an extension
+	 *
+	 * @params $dir string required - directory to search
+	 * @params $ext string required - filter by this ext
+	 * @returns array 
+	 **/
+	static public function searchDir( $dir, $ext = null ) {
+		$files = array();
+		$fh = opendir( $dir );
+		while( false !== ( $file = readdir( $fh ) ) ) {
+			if( in_array( $file , array(".","..") ) ) continue;
+			if( is_dir($file) ) $files[] = self::searchDir($file,$ext);
+			if( @$ext AND $ext !== pathinfo("$dir/$file", PATHINFO_EXTENSION) ) continue;
+			// whew made it
+			$files[] = $file;
+		}
+		return $files;
+	}	 
+
 	static function instance() 
 	{
 		if ( !self::$instance ) {

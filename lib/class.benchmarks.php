@@ -28,6 +28,7 @@ class Benchmarks {
 			$benchmark = "Benchmarkly\\$name";
 			$this->addBenchmark( new $benchmark, $name );
 		}
+		return $this;
 	}
 	
 	/**
@@ -66,10 +67,10 @@ class Benchmarks {
 	 * Run all benchmarks
 	 * @requires php 5.2.0
 	**/
-	public function testAll() 
+	public function runAll() 
 	{	
 		foreach( $this->benchmarks as $name => $obj ) {
-			$this->results[$obj->key] = $obj->test()->response();
+			$this->results[$obj->key] = $obj->runandreport()->response();
 		}
 		return $this->results;
 	}

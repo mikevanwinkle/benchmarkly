@@ -48,7 +48,7 @@ class Benchmarkly {
 		
 		// load all others here
 		add_action('bm_do_regular_cron',array($this, 'doCheck'));
-		$this->shutdown();
+		$this->setup();
 	}
 
 	public function init() 
@@ -74,6 +74,7 @@ class Benchmarkly {
 		if ( isset($_REQUEST['check_benchmarks']) ) { 
 			$this->doCheck();
 		}
+		Data::getSchema('benchmarks');
 		wp_enqueue_script( 'jquery-ui-core' );
 		wp_enqueue_script( 'jquery-ui-accordion' );
 		wp_enqueue_script( 'flot-js', plugins_url("assets/flot.js",__FILE__) , array('jquery'));
@@ -94,8 +95,7 @@ class Benchmarkly {
 	public function loadBenchmarks()
 	{ 
 		$benchmarks = Benchmarks::instance();
-		$benchmarks->loadAll();
-		$benchmarks->testAll();
+		$benchmarks->loadAll()->runAll();
 	}
 
 	public function doCron() 
@@ -130,7 +130,7 @@ class Benchmarkly {
 		$wpdb->query( $sql );
 	}
 
-	public function shutdown() 
+	public function setup() 
 	{
 		if ( isset($_REQUEST['doing_benchmarks']) ) {	
 			$benchmarks = Benchmarks::instance();
